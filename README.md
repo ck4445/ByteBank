@@ -6,19 +6,33 @@ Versions will be specified as per this: The first number signifies a full change
 ## Installation
 Please note that this has only been tested on a raspberry pi running bookworm and buster. This might not work on all operating systems. 
 
+Step 1:
+
 ### Modules needed: 
-If you are on a raspberry pi you may need to create a virtual environment to install. The following modules: smtplib, py7zr, re, numpy, heapq and last but not least scratchattach V1.4.7
+If you are on a raspberry pi you may need to create a virtual environment to install modules. The following modules: smtplib, py7zr, re, numpy, heapq and last but not least scratchattach V1.4.7
 
 The rest Is comeing soon 
 
 
 crontab: 
+first use the command
+```
+
 0 0 * * * /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/auto_sort.py && /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/backups/Main_Scripts.py
+```
 
 
-do:
+Atomatic start:
+
+First execute this command:
+
+```
+
 sudo nano /etc/systemd/system/cloud_requests.service
-paste:
+```
+
+then paste:
+```
 [Unit]
 Description=Cloud Requests Script
 After=network-online.target
@@ -35,8 +49,10 @@ User=pi
 
 [Install]
 WantedBy=multi-user.target
+```
+save and close
 
-then:
+last execute these 3 commands:
 sudo systemctl daemon-reload
 sudo systemctl enable cloud_requests.service
 sudo systemctl start cloud_requests.service
