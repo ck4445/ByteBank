@@ -53,8 +53,11 @@ WantedBy=multi-user.target
 save and close
 
 last execute these 3 commands:
+```
 sudo systemctl daemon-reload
 sudo systemctl enable cloud_requests.service
 sudo systemctl start cloud_requests.service
+```
+
 
 sorry again for docs they will slowly get better
