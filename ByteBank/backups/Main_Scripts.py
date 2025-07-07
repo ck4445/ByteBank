@@ -66,5 +66,3 @@ except Exception as e:
     print(f'Error sending email: {e}')
     delete7z()
     
-
-

@@ -23,20 +23,20 @@ def add_data(key, value):
     print(f"Added notification to user: {key} notifications: {value}")  # Print confirmation message
     return "done"
 
-def new_notification(user, from_user, amount):
+def new_notification(user, from_user, amount, message_id):
     timestamp = datetime.now(timezone.utc)
     timestamp = str(timestamp.strftime("%Y-%m-%d %H:%M"))
 
     data = json.loads(read_file())
     if user in data:
         old_noti = data[user]
-        data[user] = old_noti + "|" + from_user + "," + amount + "," + timestamp  # Update notification
+        data[user] = old_noti + "|" + from_user + "," + amount + "," + timestamp + "," + message_id  # Update notification
         print(f"Added notification to user: {user} notifications: {data[user]}")
     else:
-        data[user] = from_user + "," + amount + "," + timestamp # Add new user with notification
+        data[user] = from_user + "," + amount + "," + timestamp + "," + message_id # Add new user with notification
         print(f"New notification for user: {user} - {data[user]}")
     write_file(data)  # Write updated data
-    add_transaction(user + "," + from_user + "," + amount + "," + timestamp + "\n")
+    add_transaction(user + "," + from_user + "," + amount + "," + timestamp + "," + message_id + "\n")
     return "done"
 
 

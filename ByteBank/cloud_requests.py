@@ -1,13 +1,16 @@
-import scratchattach as scratch3
+import scratchattach as sa
+import traceback
 import main
 import notifications_transactions
 import leaderboard
+import my_secrets  # This imports USERNAME and PASSWORD
 
-session = scratch3.login("1", "2")
-conn = session.connect_cloud("3") #replace with your project id
+session = sa.login(my_secrets.USERNAME, my_secrets.PASSWORD)
+cloud = session.connect_cloud("1026899140") #replace with your project id
 
 
-client = scratch3.CloudRequests(conn)
+client = cloud.requests()
+
 
 @client.request
 def ping(): #called when client receives request
@@ -29,32 +32,41 @@ def get_balance():
     
 
 @client.request
-def pay(to, amount):
-	try:
-		user = scratch3.get_user(to)
+def pay(to, amount, message):
+    
+    try:
+        user = sa.get_user(to)
+        from_user = session.connect_user(client.get_requester()) # Returns a sa.User object
+    except:
+        return("user non existent")
 
-	except:
-		return("user non existent")
-	try:	
-		print(client.get_requester())
-		print(to)
-		print(int(amount))
-		username = str(client.get_requester()).lower()
 
-		return_value = main.pay_user(client.get_requester().lower(), str(to).lower(), amount)
-			
-		if return_value == "failed":
-			return("error")
-		else:
-			return main.get_value(username)  # Simply return the value from main.pay_user()
-	except:
-		return("error")
+    if from_user.is_new_scratcher() == False:
+        
+        try:
+            print(client.get_requester())
+            print(to)
+            print(int(amount))
+            username = str(client.get_requester()).lower()
 
+            return_value = main.pay_user(client.get_requester().lower(), str(to).lower(), amount, message)
+                
+            if return_value == "failed":
+                return("error")
+            else:
+                return main.get_value(username)  # Simply return the value from main.pay_user()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+            return("error")
+    else:
+        return("error")
 
 
 @client.request
 def get_notifications():
-    return notifications_transactions.view_notifications(str(client.get_requester()).lower())
+    return main.view_notifications(str(client.get_requester()).lower())
 
 @client.request
 def get_all_info():
@@ -62,7 +74,7 @@ def get_all_info():
     
     bytes = str(main.get_value(username))
     
-    notif = notifications_transactions.view_notifications(str(client.get_requester()).lower())
+    notif = main.view_notifications(str(client.get_requester()).lower())
     
     return bytes + "^" + notif
     
@@ -75,18 +87,18 @@ def clear_notifications():
     return()
 
 
-	
+
 @client.request
 def get_leaderboard():
-	return leaderboard.get()
-	
+    return leaderboard.get()
+
 @client.request
 def get_transactions(keyword):
-	return notifications_transactions.find_transactions(keyword)
+    return notifications_transactions.find_transactions(keyword)
 
 
 @client.event
 def on_ready():
     print("Request handler is running")
 
-client.run(no_packet_loss=True) #make sure this is ALWAYS at the bottom of your Python file
+client.start() #make sure this is ALWAYS at the bottom of your Python file
