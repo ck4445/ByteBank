@@ -1,63 +1,91 @@
 # ByteBank
-ByteBank is a project that acts as a virtual currency (without value). You can find it here: https://scratch.mit.edu/projects/1026899140/ .
 
-## Versions
-Versions will be specified as per this: The first number signifies a full change that is easier to just delete your scripts and start over, the second number signifies a client change, you will need to update your scratch client and the third number is a python scripts update you will need to update your scripts.
+ByteBank is a Scratch-based project that implements a virtual currency with no real world value. You can interact with the project here: [ByteBank on Scratch](https://scratch.mit.edu/projects/1026899140/).
+
+## Versioning
+
+The version scheme uses three numbers:
+
+1. **Major** – breaking changes that may require replacing your scripts completely.
+2. **Client** – updates for the Scratch project. Update your Scratch client.
+3. **Scripts** – updates for the Python helper scripts.
+
 ## Installation
-Please note that this has only been tested on a raspberry pi running bookworm and buster. This might not work on all operating systems. 
 
-Step 1:
+The project currently supports Raspberry Pi and Windows. Instructions for other platforms will be added in the future.
 
-### Modules needed: 
-If you are on a raspberry pi you may need to create a virtual environment to install modules. The following modules: smtplib, py7zr, re, numpy, heapq and last but not least scratchattach V1.4.7
+### Required Python Modules
 
-The rest Is comeing soon 
+- `py7zr`
+- `numpy`
+- `scratchattach==1.4.7`
 
+The modules `smtplib`, `re`, and `heapq` are included with Python and do not need to be installed separately.
 
-crontab: 
-first use the command
-```
+### Setup on Raspberry Pi
 
-0 0 * * * /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/auto_sort.py && /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/backups/Main_Scripts.py
-```
+1. Create a virtual environment and install the required modules.
+2. Configure `crontab` to run the maintenance scripts:
 
+   ```cron
+   0 0 * * * /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/auto_sort.py && /home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/backups/Main_Scripts.py
+   ```
+3. Set up the cloud request service for automatic start:
 
-Atomatic start:
+   ```bash
+   sudo nano /etc/systemd/system/cloud_requests.service
+   ```
 
-First execute this command:
+   Paste the following configuration:
 
-```
+   ```ini
+   [Unit]
+   Description=Cloud Requests Script
+   After=network-online.target
+   Wants=network-online.target
 
-sudo nano /etc/systemd/system/cloud_requests.service
-```
+   [Service]
+   ExecStart=/home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/cloud_requests.py
+   WorkingDirectory=/home/pi/Python_Projects/ByteBank/
+   StandardOutput=append:/home/pi/cloud_requests.log
+   StandardError=append:/home/pi/cloud_requests.err
+   Restart=on-failure
+   RestartSec=10
+   User=pi
 
-then paste:
-```
-[Unit]
-Description=Cloud Requests Script
-After=network-online.target
-Wants=network-online.target
+   [Install]
+   WantedBy=multi-user.target
+   ```
 
-[Service]
-ExecStart=/home/pi/bytebank/bin/python3.11 /home/pi/Python_Projects/ByteBank/cloud_requests.py
-WorkingDirectory=/home/pi/Python_Projects/ByteBank/
-StandardOutput=append:/home/pi/cloud_requests.log
-StandardError=append:/home/pi/cloud_requests.err
-Restart=on-failure
-RestartSec=10
-User=pi
+   Save and close, then enable the service:
 
-[Install]
-WantedBy=multi-user.target
-```
-save and close
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable cloud_requests.service
+   sudo systemctl start cloud_requests.service
+   ```
 
-last execute these 3 commands:
-```
-sudo systemctl daemon-reload
-sudo systemctl enable cloud_requests.service
-sudo systemctl start cloud_requests.service
-```
+### Setup on Windows
 
+1. Install **Python 3.11** from [python.org](https://www.python.org/downloads/windows/) and ensure it is added to your `PATH`.
+2. Open **Command Prompt** or **PowerShell** and navigate to the project directory.
+3. Create and activate a virtual environment:
 
-sorry again for docs they will slowly get better
+   ```powershell
+   python -m venv env
+   .\env\Scripts\activate
+   ```
+4. Install the required modules:
+
+   ```powershell
+   pip install py7zr numpy scratchattach==1.4.7
+   ```
+5. Run the main script:
+
+   ```powershell
+   python ByteBank/main.py
+   ```
+
+## Notes
+
+Documentation will continue to improve over time.
