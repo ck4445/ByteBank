@@ -37,6 +37,8 @@ def new_notification(user, from_user, amount, message_id):
         print(f"New notification for user: {user} - {data[user]}")
     write_file(data)  # Write updated data
     add_transaction(user + "," + from_user + "," + amount + "," + timestamp + "," + message_id + "\n")
+    if check_large_incoming(user):
+        print(f"Suspicious transfers detected for {user}. See flagid.txt")
     return "done"
 
 
@@ -74,10 +76,44 @@ def add_transaction(transaction):
 	write_transaction_history(data)
 	
 def find_transactions(keyword):
-	keyword = str(keyword)
-	data = str(get_transaction_history())
-	strings = re.findall(keyword, data)
-	return strings
+        keyword = str(keyword)
+        data = str(get_transaction_history())
+        strings = re.findall(keyword, data)
+        return strings
+
+
+def check_large_incoming(user, threshold=10000):
+    """Flag if over `threshold` bytes are sent to `user` within 24 hours."""
+    history = get_transaction_history().splitlines()
+    now = datetime.now(timezone.utc)
+    senders = {}
+    total = 0
+    for line in history:
+        parts = line.split(',')
+        if len(parts) < 5:
+            continue
+        to_user, from_user, amount_str, timestamp_str = parts[0], parts[1], parts[2], parts[3]
+        if to_user != user:
+            continue
+        try:
+            amount = int(amount_str)
+        except ValueError:
+            continue
+        try:
+            ts = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if (now - ts).total_seconds() <= 86400:
+            senders[from_user] = senders.get(from_user, 0) + amount
+            total += amount
+    if total >= threshold and senders:
+        flag_path = "/home/pi/Python_Projects/ByteBank/flagid.txt"
+        with open(flag_path, "w") as flagfile:
+            flagfile.write(f"Suspicious transfers to {user} in last 24 hours: {total}\n")
+            for sender, amt in senders.items():
+                flagfile.write(f"{sender}: {amt}\n")
+        return True
+    return False
 	
 	
 	

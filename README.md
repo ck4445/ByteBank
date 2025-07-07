@@ -68,19 +68,25 @@ The modules `smtplib`, `re`, and `heapq` are included with Python and do not nee
 ### Setup on Windows
 
 1. Install **Python 3.11** from [python.org](https://www.python.org/downloads/windows/) and ensure it is added to your `PATH`.
-2. Open **Command Prompt** or **PowerShell** and navigate to the project directory.
-3. Create and activate a virtual environment:
+2. Open **Command Prompt** or **PowerShell**.
+3. Clone the repository and navigate into it:
+
+   ```powershell
+   git clone https://github.com/yourusername/ByteBank.git
+   cd ByteBank
+   ```
+4. Create and activate a virtual environment:
 
    ```powershell
    python -m venv env
    .\env\Scripts\activate
    ```
-4. Install the required modules:
+5. Install the required modules:
 
    ```powershell
    pip install py7zr numpy scratchattach==1.4.7
    ```
-5. Run the main script:
+6. Run the main script:
 
    ```powershell
    python ByteBank/main.py
